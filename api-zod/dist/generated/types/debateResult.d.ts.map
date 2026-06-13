@@ -1,0 +1,1 @@
+{"version":3,"file":"debateResult.d.ts","sourceRoot":"","sources":["../../../src/generated/types/debateResult.ts"],"names":[],"mappings":"AAAA;;;;;;GAMG;AACH,OAAO,KAAK,EAAE,aAAa,EAAE,MAAM,iBAAiB,CAAC;AAErD,MAAM,WAAW,YAAY;IAC3B,SAAS,EAAE,MAAM,CAAC;IAClB,MAAM,EAAE,MAAM,CAAC;IACf,SAAS,EAAE,aAAa,EAAE,CAAC;IAC3B,0DAA0D;IAC1D,SAAS,EAAE,MAAM,CAAC;IAClB,SAAS,EAAE,IAAI,CAAC;CACjB"}

@@ -1,0 +1,200 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: debate
+    description: Multi-AI debate and brainstorm operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /debate:
+    post:
+      operationId: startDebate
+      tags: [debate]
+      summary: Start a multi-AI debate
+      description: |
+        Sends a prompt to GPT, Claude, and Gemini simultaneously.
+        Each model provides an initial response, then critiques the others,
+        and finally a synthesized best answer is produced.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DebateInput"
+      responses:
+        "200":
+          description: Full debate result with responses, critiques, and synthesis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebateResult"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /debate/sessions:
+    get:
+      operationId: listDebateSessions
+      tags: [debate]
+      summary: List past debate sessions
+      description: Returns recent debate sessions with prompt and synthesis preview
+      responses:
+        "200":
+          description: List of past debate sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DebateSession"
+
+  /debate/sessions/{id}:
+    get:
+      operationId: getDebateSession
+      tags: [debate]
+      summary: Get a specific debate session
+      description: Returns the full debate result for a given session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Full debate session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebateSession"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    DebateInput:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          minLength: 1
+          description: The question, problem, or idea to explore
+
+    ModelResponse:
+      type: object
+      required:
+        - model
+        - modelLabel
+        - initialResponse
+        - critique
+      properties:
+        model:
+          type: string
+          description: Internal model identifier (e.g. gpt, claude, gemini)
+        modelLabel:
+          type: string
+          description: Human-readable model name
+        initialResponse:
+          type: string
+          description: The model's initial answer to the prompt
+        critique:
+          type: string
+          description: This model's critique of the other two models' responses
+
+    DebateResult:
+      type: object
+      required:
+        - sessionId
+        - prompt
+        - responses
+        - synthesis
+        - createdAt
+      properties:
+        sessionId:
+          type: integer
+        prompt:
+          type: string
+        responses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModelResponse"
+        synthesis:
+          type: string
+          description: Final synthesized best answer drawn from the debate
+        createdAt:
+          type: string
+          format: date-time
+
+    DebateSession:
+      type: object
+      required:
+        - id
+        - prompt
+        - synthesis
+        - createdAt
+      properties:
+        id:
+          type: integer
+        prompt:
+          type: string
+        synthesis:
+          type: string
+        responses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModelResponse"
+        createdAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
